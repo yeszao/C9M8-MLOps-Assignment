@@ -132,7 +132,7 @@ def map_city_tier():
     conn = sqlite3.connect(db_file)
 
     df = pd.read_sql_query("SELECT * FROM loaded_data", conn)
-    df['city_mapped'] = df['city_mapped'].apply(lambda x: city_tier_mapping.get(x, 3.0))
+    df['city_tier'] = df['city_mapped'].apply(lambda x: city_tier_mapping.get(x, 3.0))
     df.to_sql('city_tier_mapped', conn, if_exists='replace', index=False)
 
     conn.commit()
