@@ -8,10 +8,12 @@ import os
 import sqlite3
 from sqlite3 import Error
 
+from scripts.constants import DB_FILE_NAME, DB_PATH, DATA_DIRECTORY
 
 ###############################################################################
 # Define the function to build database
 ###############################################################################
+
 
 def build_dbs():
     '''
@@ -40,6 +42,20 @@ def build_dbs():
     SAMPLE USAGE
         build_dbs()
     '''
+    db_file = DB_PATH.joinpath(DB_FILE_NAME)
+    if db_file.exists():
+        print("DB Already Exists")
+        return
+
+    # If the database file doesn't exist, create a new one
+    conn = sqlite3.connect(db_file)
+    c = conn.cursor()
+    c.execute('''select 1''')
+
+    conn.commit()
+    conn.close()
+    print("DB created")
+
 
 ###############################################################################
 # Define function to load the csv file to the database
@@ -69,6 +85,16 @@ def load_data_into_db():
     SAMPLE USAGE
         load_data_into_db()
     '''
+    df = pd.read_csv(DATA_DIRECTORY.joinpath('leadscoring.csv'))
+    df['total_leads_droppped'] = df['total_leads_droppped'].fillna(0)
+    df['referred_lead'] = df['referred_lead'].fillna(0)
+
+    db_file = DB_PATH.joinpath(DB_FILE_NAME)
+    conn = sqlite3.connect(db_file)
+
+    df.to_sql('loaded_data', conn, if_exists='replace', index=False)
+    conn.commit()
+    conn.close()
 
 
 ###############################################################################
