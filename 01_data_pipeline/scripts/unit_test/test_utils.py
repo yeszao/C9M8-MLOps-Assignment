@@ -1,4 +1,4 @@
-from scripts.utils import build_dbs, load_data_into_db
+from scripts.utils import build_dbs, load_data_into_db, map_city_tier
 
 
 def test_build_dbs():
@@ -7,3 +7,7 @@ def test_build_dbs():
 
 def test_load_data_into_db():
     load_data_into_db()
+
+
+def test_map_city_tier():
+    map_city_tier()

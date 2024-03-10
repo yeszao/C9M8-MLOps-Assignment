@@ -127,6 +127,17 @@ def map_city_tier():
         map_city_tier()
 
     '''
+    from scripts.city_tier_mapping import city_tier_mapping
+    db_file = DB_PATH.joinpath(DB_FILE_NAME)
+    conn = sqlite3.connect(db_file)
+
+    df = pd.read_sql_query("SELECT * FROM loaded_data", conn)
+    df['city_mapped'] = df['city_mapped'].apply(lambda x: city_tier_mapping.get(x, 3.0))
+    df.to_sql('city_tier_mapped', conn, if_exists='replace', index=False)
+
+    conn.commit()
+    conn.close()
+
 
 ###############################################################################
 # Define function to map insignificant categorial variables to "others"
