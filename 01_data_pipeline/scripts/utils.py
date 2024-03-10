@@ -13,6 +13,7 @@ from scripts.constants import DB_FILE_NAME, DB_PATH, DATA_DIRECTORY
 ###############################################################################
 # Define the function to build database
 ###############################################################################
+from scripts.significant_categorical_level import list_platform
 
 
 def build_dbs():
@@ -175,6 +176,17 @@ def map_categorical_vars():
     SAMPLE USAGE
         map_categorical_vars()
     '''
+    db_file = DB_PATH.joinpath(DB_FILE_NAME)
+    conn = sqlite3.connect(db_file)
+    df = pd.read_sql_query("SELECT * FROM city_tier_mapped", conn)
+
+    df['first_platform_c'] = df['first_platform_c'].apply(lambda x: x if x in list_platform else 'others')
+    df['first_utm_medium_c'] = df['first_utm_medium_c'].apply(lambda x: x if x in list_platform else 'others')
+    df['first_utm_source_c'] = df['first_utm_source_c'].apply(lambda x: x if x in list_platform else 'others')
+
+    df.to_sql('categorical_variables_mapped', conn, if_exists='replace', index=False)
+    conn.commit()
+    conn.close()
 
 
 ##############################################################################
