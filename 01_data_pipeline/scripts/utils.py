@@ -8,7 +8,7 @@ import os
 import sqlite3
 from sqlite3 import Error
 
-from scripts.constants import DB_FILE_NAME, DB_PATH, DATA_DIRECTORY
+from scripts.constants import DB_FILE_NAME, DB_PATH, DATA_DIRECTORY, INTERACTION_MAPPING
 
 ###############################################################################
 # Define the function to build database
@@ -229,5 +229,22 @@ def interactions_mapping():
     SAMPLE USAGE
         interactions_mapping()
     '''
-    
+    db_file = DB_PATH.joinpath(DB_FILE_NAME)
+    conn = sqlite3.connect(db_file)
+    df = pd.read_sql_query("SELECT * FROM categorical_variables_mapped", conn)
+    df = df.drop_duplicates()
+    df_unpivot = pd.melt(df, id_vars=['created_date', 'first_platform_c',
+                                      'first_utm_medium_c', 'first_utm_source_c', 'total_leads_droppped', 'city_tier',
+                                      'referred_lead', 'app_complete_flag'], var_name='interaction_type', value_name='interaction_value')
+    df_unpivot['interaction_value'] = df_unpivot['interaction_value'].fillna(0)
+
+    df_event_mapping = pd.read_csv(INTERACTION_MAPPING, index_col=[0])
+    df = pd.merge(df_unpivot, df_event_mapping, on='interaction_type', how='left')
+    df = df.drop(['interaction_type'], axis=1)
+    df_pivot = df.pivot_table(
+        values='interaction_value', index=['created_date', 'city_tier', 'first_platform_c',
+                                           'first_utm_medium_c', 'first_utm_source_c', 'total_leads_droppped',
+                                           'referred_lead', 'app_complete_flag'], columns='interaction_mapping', aggfunc='sum')
+    df_pivot = df_pivot.reset_index()
+    df_pivot.to_sql('interactions_mapped', conn, if_exists='replace', index=False)
    
