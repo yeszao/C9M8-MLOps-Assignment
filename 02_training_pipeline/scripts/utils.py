@@ -20,11 +20,11 @@ import mlflow.sklearn
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
-import lightgbm as lgb
+#import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-from Lead_scoring_training_pipeline.constants import *
+from scripts.constants import *
 
 
 ###############################################################################
@@ -55,6 +55,20 @@ def encode_features():
     **NOTE : You can modify the encode_featues function used in heart disease's inference
         pipeline from the pre-requisite module for this.
     '''
+    db_file = DB_PATH.joinpath(DB_FILE_NAME)
+    conn = sqlite3.connect(db_file)
+
+    df = pd.read_sql_query("SELECT * FROM interactions_mapped", conn)
+    df.drop(['created_date'], axis=1, inplace=True)
+    df_encoded = pd.get_dummies(df, columns=FEATURES_TO_ENCODE)
+
+    df_encoded["app_complete_flag"].to_sql('target', conn, if_exists='replace', index=False)
+
+    df_encoded.drop(['app_complete_flag'], axis=1, inplace=True)
+    df_encoded.to_sql('features', conn, if_exists='replace', index=False)
+
+    conn.commit()
+    conn.close()
 
 
 ###############################################################################

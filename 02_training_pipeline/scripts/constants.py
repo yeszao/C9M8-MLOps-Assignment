@@ -1,16 +1,20 @@
-DB_PATH = 
-DB_FILE_NAME = 
+from pathlib import Path
 
-DB_FILE_MLFLOW = 
+ROOT_PATH = Path(__file__).parent.parent.parent
 
-TRACKING_URI = 
-EXPERIMENT =
+DB_PATH = ROOT_PATH.joinpath('01_data_pipeline/scripts')
+DB_FILE_NAME = 'utils_output.db'
+
+DB_FILE_MLFLOW = ''
+
+TRACKING_URI = ''
+EXPERIMENT =''
 
 
 # model config imported from pycaret experimentation
-model_config = 
+model_config = ''
 
 # list of the features that needs to be there in the final encoded dataframe
-ONE_HOT_ENCODED_FEATURES = 
+ONE_HOT_ENCODED_FEATURES = ''
 # list of features that need to be one-hot encoded
-FEATURES_TO_ENCODE = 
+FEATURES_TO_ENCODE = ['first_platform_c', 'first_utm_medium_c', 'first_utm_source_c']
