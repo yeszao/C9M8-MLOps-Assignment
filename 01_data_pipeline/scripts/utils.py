@@ -246,5 +246,9 @@ def interactions_mapping():
                                            'first_utm_medium_c', 'first_utm_source_c', 'total_leads_droppped',
                                            'referred_lead', 'app_complete_flag'], columns='interaction_mapping', aggfunc='sum')
     df_pivot = df_pivot.reset_index()
+
+    # convert type to float
+    columns = ['career_interaction', 'assistance_interaction', 'payment_interaction', 'syllabus_interaction', 'social_interaction']
+    df_pivot[columns] = df_pivot[columns].astype(float)
     df_pivot.to_sql('interactions_mapped', conn, if_exists='replace', index=False)
    
