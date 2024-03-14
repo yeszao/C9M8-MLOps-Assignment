@@ -20,8 +20,7 @@ import mlflow.sklearn
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
-#import lightgbm as lgb
-from sklearn.model_selection import train_test_split
+import lightgbm as lgb
 from sklearn.metrics import accuracy_score
 
 from scripts.constants import *
@@ -97,5 +96,28 @@ def get_trained_model():
     SAMPLE USAGE
         get_trained_model()
     '''
+    mlflow.set_experiment('Lead_Scoring_Training_Pipeline')
+    with mlflow.start_run() as run:
+        db_file = DB_PATH.joinpath(DB_FILE_NAME)
+        conn = sqlite3.connect(db_file)
+        X = pd.read_sql_query("SELECT * FROM features", conn)
+        y = pd.read_sql_query("SELECT * FROM target", conn)
 
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        #model = lgb.LGBMClassifier()
+        model = lgb.LGBMClassifier()
+        model.fit(X_train, y_train)
+
+        y_pred = model.predict(X_test)
+        auc = roc_auc_score(y_test, y_pred)
+
+        mlflow.log_metric("auc", auc)
+        mlflow.log_param("model", "LightGBM")
+
+        mlflow.sklearn.log_model(model, "LightGBM")
+
+        conn.commit()
+        conn.close()
+        print(f"AUC Score: {auc}")
    
